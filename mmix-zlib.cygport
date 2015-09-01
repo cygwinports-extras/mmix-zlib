@@ -1,0 +1,34 @@
+CROSS_HOST="mmix"
+inherit cross multilib
+
+NAME="mmix-zlib"
+VERSION=1.2.8
+RELEASE=1
+CATEGORY="Devel"
+SUMMARY="zlib for MMIX toolchain"
+DESCRIPTION="This package does NOT contain cygwin binaries.  Instead, it
+contains MMIX binaries.  It is for use with the mmix-gcc cross compiler, and
+installs into the /usr/mmix/{lib,include} directories."
+HOMEPAGE="http://www.zlib.net/"
+SRC_URI="mirror://sourceforge/libpng/zlib-${VERSION}.tar.gz"
+SRC_DIR="zlib-${VERSION}"
+PATCH_URI="
+	http://pkgs.fedoraproject.org/cgit/zlib.git/plain/zlib-1.2.7-z-block-flush.patch
+"
+
+multilib_compile() {
+	lndirs ${S}
+	rm -f Makefile
+	CC="${CC}" CFLAGS="${CFLAGS}" CHOST=${CROSS_HOST} \
+	./configure --prefix=${CROSS_PREFIX} --libdir=${CROSS_LIBDIR}
+	cygmake
+}
+
+multilib_install() {
+	cyginstall
+}
+
+multilib_postinstall() {
+	# already provided by native zlib
+	rm -fr ${D}${CROSS_DATADIR}/man
+}
